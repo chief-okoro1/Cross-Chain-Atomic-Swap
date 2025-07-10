@@ -60,3 +60,51 @@
     verification-time: uint
   }
 )
+
+;; Tracks signers for multi-signature swaps
+(define-map multi-sig-approvals
+  { swap-id: (buff 32), signer: principal }
+  { approved: bool, signature-time: uint }
+)
+
+;; Stores mixing pools for enhanced privacy
+(define-map mixing-pools
+  { pool-id: (buff 32) }
+  {
+    total-amount: uint,
+    participant-count: uint,
+    min-amount: uint,
+    max-amount: uint,
+    activation-threshold: uint,
+    active: bool,
+    creation-height: uint,
+    execution-delay: uint,
+    execution-window: uint
+  }
+)
+
+;; Tracks participants in mixing pools
+(define-map mixer-participants
+  { pool-id: (buff 32), participant-id: uint }
+  {
+    participant: principal,
+    amount: uint,
+    blinded-output-address: (buff 64),
+    joined-height: uint,
+    withdrawn: bool
+  }
+)
+
+;; Protocol admin for governance
+(define-data-var contract-admin principal tx-sender)
+
+;; Fee accumulator for protocol fees
+(define-data-var protocol-fee-balance uint u0)
+
+;; Contract version
+(define-data-var contract-version (string-ascii 20) "1.0.0")
+
+;; Verify a HTLC hash matches the preimage
+(define-private (verify-hash (preimage (buff 32)) (hash-lock (buff 32)))
+  (is-eq (sha256 preimage) hash-lock)
+)
